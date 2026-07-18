@@ -1,12 +1,14 @@
-# Prompt_Generator
+# Loop_Engineering
 
 [![Orkestrix](https://img.shields.io/badge/Author-Orkestrix-blue)](https://github.com/Orkestrix-ai)
-[![Version](https://img.shields.io/badge/Version-1.1-green)]()
+[![Version](https://img.shields.io/badge/Version-2.0-green)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow)]()
 
-Çalışmaya hazır **promptlar** ve kendi kendini denetleyen **otonom loop'lar** üreten Claude skill'i.
+Çalışmaya hazır **promptlar** ve kanıtlanmış pattern'lere dayanan, kendi kendini denetleyen **otonom loop'lar** üreten Claude skill'i.
 
 > Prompt mühendisliği talimatı optimize eder. **Loop mühendisliği süreci optimize eder.**
+
+*(Eski adı: Prompt_Generator)*
 
 ---
 
@@ -23,9 +25,18 @@
 
 ---
 
-## 🔁 Loop Mühendisliği
+## 🔁 Loop Mühendisliği (Loop Engineering)
 
-**Tanım**: En basit tanımıyla loop mühendisliği; yapay zekâya tek seferlik talimatlar (prompt) vermek yerine, yapay zekânın kendi kendini yönettiği, denetlediği, hatalarını düzeltip hedefe ulaşana kadar döndüğü otonom sistemleri ve iş akışlarını tasarlama disiplinidir.
+**Tanım**: Loop mühendisliği; yapay zekâya tek seferlik talimatlar (prompt) vermek yerine, sistemin kendisini — görev keşfeden, eyleme geçen, doğrulayan, hatasını düzeltip hedefe ulaşana kadar döndüren otonom mekanizmayı — tasarlama disiplinidir. Sen ajanı tur tur yönlendirmek yerine, **bunu senin yerine yapacak sistemi** kurarsın.
+
+Alanın evrimi:
+
+```
+Prompt Engineering  → Modele NE söylenir?
+Context Engineering → Modele hangi bilgi/tool gösterilir?
+Harness Engineering → Model hangi çalıştırılabilir ortama bağlanır?
+Loop Engineering    → Sistem nasıl tekrar gözlemler / eyler / doğrular / durur?
+```
 
 ```
 PROMPT   Talimat → Çıktı → [insan denetler] → [insan düzeltir]
@@ -41,10 +52,20 @@ LOOP     Hedef → Plan → Eylem → Doğrula → Hata mı? → Düzelt ↺
 |---|---|---|
 | 1 | **Hedef** | Ölçülebilir tek cümle. "İyi kod yaz" değil. |
 | 2 | **Doğrulayıcı (Verifier)** | Nesnel sinyal: test, lint, build, schema, HTTP. Modelin "bence oldu" demesi doğrulama değildir. |
-| 3 | **Çıkış koşulu** | Ne zaman başarıyla, ne zaman başarısız durur? |
-| 4 | **Limit + escalation** | Max tur sayısı ve dolduğunda ne olacağı (insana devret). |
+| 3 | **Çıkış koşulu** | Binary + deterministik + ölçülebilir bir duruma referans verir. Ne zaman başarıyla, ne zaman başarısız durur? |
+| 4 | **Limit + escalation** | Max tur sayısı ve dolduğunda ne olacağı (Circuit Breaker → insana devret). |
 | 5 | **State** | Denenen ve işe yaramayan çözümler taşınır → aynı hata tekrarlanmaz. |
 | 6 | **Scope** | Dokunulmaz alanlar (prod, secrets, migration, silme). |
+
+### 10 Loop Pattern'i (özet)
+
+| Grup | Pattern'ler |
+|---|---|
+| **Temel** | ReAct · Reflection · Tool Use · Prompt Chaining |
+| **Pratikte kanıtlanmış** | Ralph Loop (dış validator, context reset) · Evaluator-Optimizer (worker ≠ checker) · Multi-Agent Supervisor |
+| **Prodüksiyon sağlamlaştırma** | Circuit Breaker (stagnation koruması) · Heartbeat Loop (zamanlanmış tetik) · Bounded Execution (token/tur/süre tavanı) |
+
+Detaylı tanımlar ve seçim rehberi için **SKILL.md**.
 
 ### Loop anti-pattern'leri
 
@@ -73,7 +94,7 @@ LOOP     Hedef → Plan → Eylem → Doğrula → Hata mı? → Düzelt ↺
 
 1. **Görev** — Ne yapılacak? (1-2 cümle)
 2. **Context** — Stack, kütüphaneler, kısıtlar
-3. **Başarı kriteri** — Ne "başarı" sayılır? *(Loop ise: bunu hangi komut ölçüyor?)*
+3. **Başarı kriteri** — Ne "başarı" sayılır? *(Loop ise: bunu hangi komut ölçüyor, doğrulanabilir mi?)*
 4. **Format** — JSON / TypeScript / Markdown / plain text
 5. **Constraints** — Neleri yapmasın?
 
@@ -116,13 +137,15 @@ Hook:
 Output: Kopyala-yapıştır React hook
 ```
 
-### 2. Loop — Test yeşile dönene kadar debug
+### 2. Loop (Ralph Loop pattern) — Test yeşile dönene kadar debug
 
 **İstek**: "Modül testleri kırmızı, kendi kendini düzelten bir loop kur"
 
 **Çıktı** (loop prompt):
 ```
 ROL: Testleri yeşile döndürene kadar otonom çalışan debug agent'sın.
+
+PATTERN: Ralph Loop (verifier = test suite, öz-değerlendirme yok)
 
 HEDEF: [modül] altındaki tüm testler geçene kadar üretim kodunu düzelt.
 
@@ -146,7 +169,7 @@ KISITLAR:
 - Migration çalıştırma, .env dosyalarına dokunma.
 - Aynı düzeltmeyi iki kez deneme.
 
-ESCALATION:
+ESCALATION (Circuit Breaker):
 Limit dolarsa veya failing sayısı 2 tur azalmazsa: DUR, "TAKILDIM" yaz,
 son hatayı + denenenleri + hipotezini raporla.
 
@@ -161,7 +184,7 @@ Sonuç (BAŞARILI/TAKILDIM) · Tur sayısı · Değişen dosyalar · Kök neden
 ### Repo yapısı
 
 ```
-Prompt_Generator/
+Loop_Engineering/
 ├── SKILL.md      # Skill tanımı (frontmatter + tüm şablonlar/örnekler)
 ├── README.md     # Bu dosya
 └── LICENSE       # MIT
@@ -170,38 +193,38 @@ Prompt_Generator/
 ### 1. Klonlama
 
 ```bash
-git clone https://github.com/Orkestrix-ai/Prompt_Generator.git
-cd Prompt_Generator
+git clone https://github.com/Orkestrix-ai/Loop_Engineering.git
+cd Loop_Engineering
 ```
 
 SSH ile:
 ```bash
-git clone git@github.com:Orkestrix-ai/Prompt_Generator.git
+git clone git@github.com:Orkestrix-ai/Loop_Engineering.git
 ```
 
 ### 2. Skill olarak kurma
 
 **Claude Code (kullanıcı seviyesi — tüm projelerde aktif):**
 ```bash
-mkdir -p ~/.claude/skills/prompt-generator
-cp SKILL.md README.md ~/.claude/skills/prompt-generator/
+mkdir -p ~/.claude/skills/loop-engineering
+cp SKILL.md README.md ~/.claude/skills/loop-engineering/
 ```
 
 **Claude Code (proje seviyesi — sadece bu repo'da aktif):**
 ```bash
-mkdir -p .claude/skills/prompt-generator
-cp SKILL.md README.md .claude/skills/prompt-generator/
+mkdir -p .claude/skills/loop-engineering
+cp SKILL.md README.md .claude/skills/loop-engineering/
 ```
 
 Doğrudan klonlayarak da kurabilirsin:
 ```bash
-git clone https://github.com/Orkestrix-ai/Prompt_Generator.git \
-  ~/.claude/skills/prompt-generator
+git clone https://github.com/Orkestrix-ai/Loop_Engineering.git \
+  ~/.claude/skills/loop-engineering
 ```
 
 Kurulumu doğrula:
 ```bash
-ls ~/.claude/skills/prompt-generator/SKILL.md
+ls ~/.claude/skills/loop-engineering/SKILL.md
 ```
 Claude'u yeniden başlat, ardından `"prompt oluştur: ..."` veya `"loop kur: ..."` yaz — skill tetiklenmeli.
 
@@ -210,22 +233,22 @@ Claude'u yeniden başlat, ardından `"prompt oluştur: ..."` veya `"loop kur: ..
 ### 3. Güncelleme
 
 ```bash
-cd ~/.claude/skills/prompt-generator
+cd ~/.claude/skills/loop-engineering
 git pull origin main
 ```
 
 ### 4. Katkı / Push (maintainer)
 
 ```bash
-git checkout -b feature/loop-engineering
+git checkout -b feature/loop-patterns
 # SKILL.md ve/veya README.md üzerinde değişiklik yap
 git add SKILL.md README.md
-git commit -m "feat: loop mühendisliği modu ve loop prompt şablonu (v1.1)"
-git push -u origin feature/loop-engineering
+git commit -m "feat: yeni loop pattern'i ekle"
+git push -u origin feature/loop-patterns
 ```
 Ardından GitHub'da PR aç. Doğrudan `main`'e:
 ```bash
-git add . && git commit -m "docs: v1.1" && git push origin main
+git add . && git commit -m "docs: v2.0" && git push origin main
 ```
 
 > **Loop modu** için agent runtime'ı olan bir ortam gerekir (Claude Code, n8n, kendi orchestrator'ın). Bu skill loop'u **tasarlar ve prompt'unu üretir**; runtime'ı kurmaz.
@@ -239,22 +262,24 @@ git add . && git commit -m "docs: v1.1" && git push origin main
 | Prompt hâlâ belirsiz | Constraints ve örnek ekle |
 | Çıktı çok uzun | "Kısaca" / "max 200 kelime" / bullet points |
 | Format yanlış | Beklenen output'un örneğini göster |
-| **Loop durmuyor** | Çıkış koşulu nesnel değil → verifier'ı komuta bağla, limit ekle |
-| **Loop "başardım" diyor ama başarmamış** | Kendi çıktısını doğruluyor → doğrulamayı dış sinyale taşı |
+| **Loop durmuyor** | Çıkış koşulu doğrulanabilir değil → verifier'ı komuta bağla, limit ekle |
+| **Loop "başardım" diyor ama başarmamış** | Kendi çıktısını doğruluyor (self-serving bias) → worker/checker'ı ayır, doğrulamayı dış sinyale taşı |
 | **Loop aynı hatayı tekrarlıyor** | State eksik → "denenmiş çözümler" listesini her turda taşıt |
+| **Yanlış pattern seçildi** | Basit debug'a ağır bir pattern (Multi-Agent Supervisor) kurmak yerine Ralph Loop/Evaluator-Optimizer yeterlidir |
 
 ---
 
 ## 📖 Referanslar
 
-- **SKILL.md** — Detaylı dokümantasyon, şablonlar, tüm örnekler
+- **SKILL.md** — Detaylı dokümantasyon, 10 loop pattern'i, doğrulanabilir çıkış koşulu tasarımı, tüm şablonlar ve örnekler
 - **Claude Docs** — [Prompting Guide](https://docs.anthropic.com)
+- Loop mühendisliği araştırma kaynakları SKILL.md'nin sonunda listelenmiştir (Lushbinary, Data Science Dojo, MindStudio, Cobus Greyling ve diğerleri)
 
 ---
 
 ## 🤝 Katkı & Destek
 
-- **GitHub**: [@Orkestrix-ai](https://github.com/Orkestrix-ai) · [Issues](https://github.com/Orkestrix-ai/Prompt_Generator/issues)
+- **GitHub**: [@Orkestrix-ai](https://github.com/Orkestrix-ai) · [Issues](https://github.com/Orkestrix-ai/Loop_Engineering/issues)
 - **Email**: orkestrix@gmail.com
 
 ## 📄 License
@@ -263,6 +288,6 @@ MIT License © 2026 Orkestrix
 
 ---
 
-**Last Updated**: 2026-07-14
-**Version**: 1.1
+**Last Updated**: 2026-07-18
+**Version**: 2.0
 **Maintainer**: Orkestrix

@@ -1,13 +1,13 @@
 ---
-name: prompt_generator
-description: "Kullanıcının ihtiyacına göre AI modellerine, iş süreçlerine ve kod/test görevlerine yönelik çalışmaya hazır promptlar ve loop (otonom döngü) tasarımları oluştur. Trigger: 'prompt oluştur', 'prompt yaz', 'prompt gerek', 'nasıl sor', 'AI''ya ne desen', 'test prompt', 'code prompt', 'loop kur', 'loop prompt', 'otonom akış', 'self-correcting agent', 'agent loop', veya belirli bir görev için etkili bir prompt ya da kendi kendini denetleyen bir iş akışı gerektiğinde. Teknik (API, kod analizi), iş (sales, HR, operasyon), ve creative (yazı, tasarım) promptlar dahil."
+name: loop_engineering
+description: "Kullanıcının ihtiyacına göre AI modellerine, iş süreçlerine ve kod/test görevlerine yönelik çalışmaya hazır promptlar ve loop (otonom döngü) tasarımları oluştur. Loop mühendisliği (loop engineering) metodolojisine dayanır: ReAct, Reflection, Ralph Loop, Evaluator-Optimizer, Multi-Agent Supervisor, Circuit Breaker gibi kanıtlanmış loop pattern'lerini ve doğrulanabilir çıkış koşulu (verifiable stop condition) tasarımını kullanır. Trigger: 'prompt oluştur', 'prompt yaz', 'prompt gerek', 'nasıl sor', 'AI''ya ne desen', 'test prompt', 'code prompt', 'loop kur', 'loop mühendisliği', 'loop prompt', 'otonom akış', 'self-correcting agent', 'agent loop', 'ralph loop', 'verifier tasarla', veya belirli bir görev için etkili bir prompt ya da kendi kendini denetleyen bir iş akışı gerektiğinde. Teknik (API, kod analizi), iş (sales, HR, operasyon), ve creative (yazı, tasarım) promptlar dahil."
 ---
 
-# Prompt_Generator
+# Loop_Engineering
 
-**Versiyon**: 1.1 | **Sahip**: Orkestrix | **Repo**: [Prompt_Generator](https://github.com/Orkestrix-ai/Prompt_Generator)
+**Versiyon**: 2.0 | **Sahip**: Orkestrix | **Repo**: [Loop_Engineering](https://github.com/Orkestrix-ai/Loop_Engineering)
 
-Etkili promptlar oluşturmak sanat ve bilimdir. Bu skill, kullanıcının amaçlarını anlayıp, Claude (veya diğer AI modelleri) için optimize edilmiş, çalışmaya hazır promptlar üretir.
+Etkili promptlar oluşturmak sanat ve bilimdir; otonom döngüler tasarlamak ise ayrı bir disiplindir. Bu skill, kullanıcının amaçlarını anlayıp, Claude (veya diğer AI modelleri) için optimize edilmiş, çalışmaya hazır promptlar **ve** kanıtlanmış loop mühendisliği pattern'lerine dayanan otonom döngü tasarımları üretir.
 
 Bu skill iki modda çalışır:
 
@@ -18,11 +18,22 @@ Bu skill iki modda çalışır:
 
 ---
 
-## Loop Mühendisliği (Loop Engineering)
+## Loop Mühendisliği (Loop Engineering) Nedir?
 
-**Tanım**: En basit tanımıyla loop mühendisliği; yapay zekâya tek seferlik talimatlar (prompt) vermek yerine, yapay zekânın kendi kendini yönettiği, denetlediği, hatalarını düzeltip hedefe ulaşana kadar döndüğü otonom sistemleri ve iş akışlarını tasarlama disiplinidir.
+**Tanım**: Loop mühendisliği; yapay zekâya tek seferlik talimatlar (prompt) vermek yerine, sistemi **kendisinin** ajanı zamanla/olayla tetikleyip görev keşfeden, doğrulayan, tekrar deneyen ve durduran şekilde tasarlama disiplinidir. Kısacası: ajanı sen turdan tura yönlendirmek yerine, bunu **senin yerine yapacak sistemi** tasarlarsın.
 
-Prompt mühendisliği **talimatı** optimize eder; loop mühendisliği **süreci** optimize eder. Bir loop'ta prompt artık çıktının kendisi değil, döngünün bir bileşenidir.
+> Prompt mühendisliği **talimatı** optimize eder. Context mühendisliği modelin **görebileceklerini** optimize eder. Harness mühendisliği modeli **çalıştırılabilir bir ortama** bağlar. Loop mühendisliği ise sistemin **tekrar tekrar gözlemleme → eyleme geçme → doğrulama → düzeltme** döngüsünü nasıl yürüteceğini tasarlar.
+
+### Alanın evrimi (2023 → 2026)
+
+```
+1. Prompt Engineering   → Modele NE söylenir? (talimat kalitesi)
+2. Context Engineering  → Modele hangi bilgi/tool/data gösterilir?
+3. Harness Engineering  → Model hangi çalıştırılabilir ortama bağlanır? (tool loop, sandbox)
+4. Loop Engineering     → Sistem NASIL tekrar tekrar gözlemler, eyler, doğrular, düzeltir, durur?
+```
+
+Terim, 2026 ortasında Claude Code ekibinden Boris Cherny'nin kendi iş akışını "Claude'u manuel yönlendirmek yerine, ne yapılacağını bulup onu prompt'layan döngüler" olarak tanımlamasıyla yaygınlaştı. Odak, **prompt yazmaktan döngü tasarlamaya** kaydı.
 
 ### Prompt vs. Loop
 
@@ -31,10 +42,22 @@ PROMPT (tek seferlik)
 Talimat → Çıktı → [insan denetler] → [insan düzeltir]
 
 LOOP (otonom)
-Hedef → Plan → Eylem → Doğrulama (self-check) → Hata mı? → Düzelt → tekrar Eylem
+Hedef → Plan → Eylem → Doğrulama (dış sinyal) → Hata mı? → Düzelt → tekrar Eylem
                             ↓ Hayır
                      Çıkış koşulu (exit) → Sonuç
 ```
+
+### Beş katmanlı model
+
+Sağlam bir otonom loop şu beş katmandan oluşur:
+
+| Katman | Ne yapar? |
+|---|---|
+| **Harness** | Ajanın çalıştığı ortam: tool erişimi, sandbox, dosya sistemi |
+| **Loop contract** | "Bitti" ne demek — hedef + doğrulayıcı + çıkış koşulu tanımı |
+| **State layer** | Restart'a dayanıklı durum: denenen çözümler, dosyalar, tur sayısı |
+| **Checker** | Otomatik doğrulama — ayrı bir prompt/model çağrısıyla, yapıcı ajandan bağımsız |
+| **Human checkpoint** | Geri alınamaz eylemlerden önce insanın gözden geçirdiği nokta |
 
 ### Bir loop'un zorunlu 6 bileşeni
 
@@ -47,16 +70,108 @@ Loop tasarlarken bu altısı **eksiksiz** tanımlanmalıdır. Eksik olan her bil
 5. **Durum/hafıza (State)** — Turlar arasında taşınan bağlam: denenen çözümler, alınan hatalar, değişen dosyalar. Aynı hatayı iki kez denemeyi engelleyen şey budur.
 6. **Eylem alanı (Tools/Scope)** — Loop'un neye dokunabileceği ve **kesinlikle dokunamayacağı** sınır (prod DB'ye yazma yok, migration çalıştırma yok, dosya silme yok).
 
-### Loop Prompt Şablonu
+---
+
+## Doğrulanabilir Çıkış Koşulu (Verifiable Stop Condition) Tasarımı
+
+Bir çıkış koşulu **doğrulanabilir** sayılır ancak üç özelliği taşıyorsa:
+
+- **Binary** — evet/hayır, yorum gerektirmez
+- **Deterministik** — ajan kendi muhakemesiyle değil, ölçülebilir durumla kontrol eder
+- **Ölçülebilir bir duruma referans verir** — dosya, sayı, komut çıktısı
+
+### Doğrulanabilir koşul türleri
+
+| Tür | Örnek |
+|---|---|
+| **Count-based** | Sabit iterasyon limiti (max 5 tur) |
+| **State-change** | Dosya oluştu mu, API "complete" döndü mü |
+| **List completion** | Listedeki tüm item'lar işlendi mi |
+| **Threshold** | %80 test coverage, hata oranı <%1 |
+| **Schema validation** | Çıktı beklenen JSON şemasına uyuyor mu |
+
+### Sık yapılan hatalar
+
+❌ **Öznel dil** — "kaliteli", "kapsamlı", "tamamlanmış hissi" gibi ifadeler tutarsız döngü üretir; ajan kendi kendini güvenilir değerlendiremez.
+❌ **Self-evaluation bias** — ajanlar kendi çıktısını olduğundan iyi görme eğilimindedir; dış doğrulama şart.
+❌ **Iterasyon limiti eksikliği** — yanlış kurgulanmış koşullar sonsuz döngüye yol açar.
+❌ **İmkansız koşul** — ajanın asla sağlayamayacağı bir gereksinim, her seferinde limiti doldurur.
+❌ **Sorumlulukların karışması** — görevi yürüten ile "bitti mi" diyen aynı ajan/çağrı olursa çıkar çatışması oluşur.
+
+### Önerilen yapı: Worker / Checker / Router ayrımı
+
+Kendi çıktısını değerlendiren ajan güvenilmezdir ("self-serving evaluation bias" — literatürde belgelenmiş bir önyargı). Bu yüzden mimariyi ayır:
+
+- **Worker** — görevi yürütür
+- **Checker** — çıkış koşulunu **ayrı bir prompt/model çağrısıyla**, yapılandırılmış (JSON) çıktıyla değerlendirir
+- **Router** — checker'ın sonucuna göre devam et / dur / escalate kararını verir
+
+---
+
+## 10 Loop Pattern'i (Loop Design Patterns)
+
+Görev tipine göre hangi loop pattern'inin kullanılacağını seç:
+
+### Temel pattern'ler
+
+| # | Pattern | Ne için | Verifier |
+|---|---|---|---|
+| 1 | **ReAct Loop** | Genel amaçlı ajan mimarisi: Algıla → Muhakeme et → Planla → Eyle → Gözlemle | Görev tamamlama / durma koşulu |
+| 2 | **Reflection Loop** | Halüsinasyonu azaltmak, tutarsızlıkları yakalamak | Ajanın kendi öz-eleştirisi (zayıf verifier — dikkatli kullan) |
+| 3 | **Tool Use Loop** | Eğitim verisi dışı bilgiye erişim (API, DB, canlı sistem) | Dış sistemin döndürdüğü sonuç |
+| 4 | **Prompt Chaining** | Karmaşık görevi sabit, izlenebilir alt adımlara bölmek | Tüm önceden tanımlı adımların tamamlanması |
+
+### Pratikte kanıtlanmış pattern'ler
+
+| # | Pattern | Ne için | Verifier |
+|---|---|---|---|
+| 5 | **Ralph Loop** | Kendi kendini doğrulama önyargısını önlemek; her iterasyonda context'i sıfırlar | Derleyici, linter, test suite gibi **dış** validator'lar |
+| 6 | **Evaluator-Optimizer Loop** | Üretici ile eleştirmeni ayırmak | Ayrı bir "evaluator" ajanın yapılandırılmış onayı |
+| 7 | **Multi-Agent Supervisor Loop** | Tek context penceresini aşan karmaşık işi uzmanlaşmış worker'lara dağıtmak | Supervisor'ın iş akışını yönetmesi |
+
+### Prodüksiyon sağlamlaştırma pattern'leri
+
+| # | Pattern | Ne için | Verifier |
+|---|---|---|---|
+| 8 | **Circuit Breaker** | Takılan ajanın sonsuz token yakmasını önlemek | N tur boyunca ilerleme yoksa devre kesilir, insana bildirilir |
+| 9 | **Heartbeat Loop** | Sürekli çalışma yerine zamanlanmış/olay tetiklemeli, maliyeti düşük çalışma | Zamanlanmış tetik + "in progress" kilidi |
+| 10 | **Bounded Execution & Context Engineering** | Kaynak tüketimini sınırlamak, context penceresi bozulmasını yönetmek | Maksimum iterasyon / token / wall-time tavanı |
+
+**Seçim kuralı**: Basit debug/test-yeşile-döndürme görevlerinde **Ralph Loop** veya **Evaluator-Optimizer** varsayılan; kod tabanı geneline yayılan büyük işlerde **Multi-Agent Supervisor**; uzun süre çalışan/otomatik tetiklenen sistemlerde **Heartbeat + Circuit Breaker** kombinasyonu.
+
+### Loop Anti-Patterns
+
+❌ **Doğrulayıcısız loop** — "Beğenene kadar iyileştir." Model kendi çıktısını beğenir, döngü anlamsız döner.
+❌ **Limitsiz loop** — Çıkış koşulu yoksa token yakar, sonsuza gider.
+❌ **State'siz loop** — Her tur sıfırdan başlar, aynı hatalı çözümü tekrar dener.
+❌ **Yıkıcı eylem alanı** — Loop'a geri alınamayan yetki (prod delete, force push) vermek.
+❌ **Reflection'ı tek verifier olarak kullanmak** — ajanın öz-değerlendirmesi dış sinyalin yerini tutamaz.
+❌ **Her şeyi loop'a sokmak** — Blog yazısı, tek seferlik SQL, basit refactor loop istemez. Loop maliyeti (token + risk) ancak doğrulanabilir + tekrarlı görevlerde geri döner.
+
+### Loop ne zaman DOĞRU araçtır?
+
+✅ Nesnel bir doğrulayıcı var (test, lint, build, schema, API response)
+✅ Görev tek geçişte %100 doğru bitmiyor, iterasyon gerekiyor
+✅ Hata sinyali makine tarafından okunabilir
+✅ Yanlış adımın maliyeti geri alınabilir (branch, staging, dry-run)
+
+Bu dördü sağlanmıyorsa **single-shot prompt** üret, loop üretme.
+
+---
+
+## Loop Prompt Şablonu
 
 ```
 ROL: Sen [X] görevini hedefe ulaşana kadar otonom yürüten bir agent'sın.
 
+PATTERN: [Ralph Loop / Evaluator-Optimizer / Multi-Agent Supervisor / ...]
+
 HEDEF:
 [Tek cümle, ölçülebilir]
 
-BAŞARI TANIMI (Verifier):
-[Nesnel komut/sinyal, ör: `npm test` çıktısında 0 failing]
+BAŞARI TANIMI (Verifier — Worker'dan bağımsız Checker):
+[Nesnel komut/sinyal, ör: `npm test` çıktısında 0 failing. Binary, deterministik,
+ölçülebilir bir duruma referans verir. Ajanın kendi görüşü verifier değildir.]
 
 DÖNGÜ:
 1. PLAN    → Mevcut duruma bak, bir sonraki tek adımı seç ve gerekçelendir.
@@ -78,30 +193,13 @@ KISITLAR:
 - Aynı çözümü iki kez deneme.
 - Doğrulama çıktısını uydurma; komutu gerçekten çalıştır.
 
-ESCALATION:
+ESCALATION (Circuit Breaker):
 Limit dolarsa veya aynı hata 2 turdur değişmiyorsa: dur, "TAKILDIM" yaz,
 son hatayı + denenenleri + önerini raporla.
 
 FINAL ÇIKTI FORMATI:
 [Beklenen rapor formatı]
 ```
-
-### Loop Anti-Patterns
-
-❌ **Doğrulayıcısız loop** — "Beğenene kadar iyileştir." Model kendi çıktısını beğenir, döngü anlamsız döner.
-❌ **Limitsiz loop** — Çıkış koşulu yoksa token yakar, sonsuza gider.
-❌ **State'siz loop** — Her tur sıfırdan başlar, aynı hatalı çözümü tekrar dener.
-❌ **Yıkıcı eylem alanı** — Loop'a geri alınamayan yetki (prod delete, force push) vermek.
-❌ **Her şeyi loop'a sokmak** — Blog yazısı, tek seferlik SQL, basit refactor loop istemez. Loop maliyeti (token + risk) ancak doğrulanabilir + tekrarlı görevlerde geri döner.
-
-### Loop ne zaman DOĞRU araçtır?
-
-✅ Nesnel bir doğrulayıcı var (test, lint, build, schema, API response)
-✅ Görev tek geçişte %100 doğru bitmiyor, iterasyon gerekiyor
-✅ Hata sinyali makine tarafından okunabilir
-✅ Yanlış adımın maliyeti geri alınabilir (branch, staging, dry-run)
-
-Bu dördü sağlanmıyorsa **single-shot prompt** üret, loop üretme.
 
 ---
 
@@ -134,7 +232,7 @@ Kural: doğrulayıcı (test/lint/build/schema/HTTP) yoksa → single-shot. Varsa
 Önce sor/karar ver: **single-shot mu, loop mu?**
 - Nesnel doğrulayıcı var mı? → yoksa single-shot.
 - Tek geçişte biter mi? → biterse single-shot.
-- İkisi de "hayır" ise → loop tasarla, Loop Prompt Şablonu'nu kullan.
+- İkisi de "hayır" ise → loop tasarla, uygun pattern'i seç (yukarıdaki 10 pattern'den), Loop Prompt Şablonu'nu kullan.
 
 ### 1. Gereksinim Toplama
 
@@ -142,10 +240,10 @@ Eğer kullanıcı eksik bilgi sağlamışsa, sor:
 
 - **Görev**: Tam olarak ne yapılsın?
 - **Context**: Hangi teknolojiler/frameworks/tools?
-- **Başarı Kriterleri**: Ne "başarı" demek bu görev için? (loop ise: hangi komut/sinyal bunu ölçüyor?)
+- **Başarı Kriterleri**: Ne "başarı" demek bu görev için? (loop ise: hangi komut/sinyal bunu ölçüyor, doğrulanabilir mi?)
 - **Constraints**: Varsa sınırlamalar (dosya boyutu, hız, uyum, vb)?
 - **Tone/Style**: Resmi mi, casual mi, teknik mi?
-- **(Loop ise)** Iterasyon limiti, dokunulmaz alanlar, escalation hedefi?
+- **(Loop ise)** Hangi pattern uygun, iterasyon limiti, dokunulmaz alanlar, escalation hedefi?
 
 ### 2. Prompt Tasarımı
 
@@ -158,7 +256,7 @@ Eğer kullanıcı eksik bilgi sağlamışsa, sor:
 - **Örnek sağlar** - mümkünse input/output örneği
 - **Constraints listeler** - neleri yapmasın?
 
-İyi bir loop, bunlara ek olarak: **verifier + exit + limit + state + scope** içerir.
+İyi bir loop, bunlara ek olarak: **pattern seçimi + verifier + exit + limit + state + scope** içerir ve worker/checker ayrımını netleştirir.
 
 ### 3. Optimizasyon
 
@@ -173,6 +271,7 @@ Loop'u test et:
 - Kasıtlı bir hata enjekte et — loop yakalıyor mu?
 - Limit gerçekten devreye giriyor mu?
 - State turlar arasında taşınıyor mu, aynı çözümü tekrar deniyor mu?
+- Verifier ajanın kendi görüşünden mi geliyor, yoksa gerçekten dış/ayrı bir kontrol mü?
 
 ---
 
@@ -247,7 +346,9 @@ Example of desired output: [Benzeri örnek]
 ✅ **Role ver** - "sen bir senior engineer gibi..."
 ✅ **Format tanımla** - JSON, Markdown, pseudo-code, vb
 ✅ **Loop'ta doğrulayıcıyı dışarıdan al** - modelin öz-değerlendirmesi doğrulayıcı değildir
+✅ **Loop'ta worker/checker'ı ayır** - aynı ajan hem yapıp hem onaylarsa self-serving bias oluşur
 ✅ **Loop'ta her zaman limit + escalation yaz** - takılan loop, hatalı loop'tan pahalıdır
+✅ **Doğru pattern'i seç** - basit debug'a Multi-Agent Supervisor kurmak; büyük migration'a tek Reflection loop'u yeterli değildir
 
 ❌ Vakit kaybetme - eğer prompt hala işe yaramıyorsa, direkt geri bildir ve itera yap
 
@@ -261,7 +362,7 @@ Hiçbir açıklama ekleme, sadece prompt ver.
 
 Eğer prompt çok kompleks ise, sections ile böl (ör: system prompt + user prompt).
 
-Loop üretiliyorsa çıktı: tek blok halinde loop prompt'u (rol + hedef + verifier + döngü + state + kısıtlar + escalation + final format).
+Loop üretiliyorsa çıktı: tek blok halinde loop prompt'u (rol + pattern + hedef + verifier + döngü + state + kısıtlar + escalation + final format).
 
 ---
 
@@ -335,12 +436,14 @@ Length: 150-200 kelime
 Output: HTML email template
 ```
 
-### Örnek 4 (LOOP): Test-yeşile-dönene-kadar debug loop
+### Örnek 4 (LOOP — Ralph Loop pattern): Test-yeşile-dönene-kadar debug loop
 **İstek**: "Modül testleri kırmızı, kendi kendini düzelten bir loop kur"
 
 **Çıktı**:
 ```
 ROL: Sen bu repoda testleri yeşile döndürene kadar otonom çalışan bir debug agent'sın.
+
+PATTERN: Ralph Loop (dış validator = test suite; öz-değerlendirme yok)
 
 HEDEF:
 `src/approvals/**` altındaki tüm testler geçene kadar üretim kodunu düzelt.
@@ -368,7 +471,7 @@ KISITLAR:
 - Supabase migration çalıştırma, .env dosyalarına dokunma.
 - Aynı düzeltmeyi iki kez deneme.
 
-ESCALATION:
+ESCALATION (Circuit Breaker):
 5. tur dolarsa veya failing sayısı 2 tur üst üste azalmazsa: DUR, "TAKILDIM" yaz,
 son hatayı + denenen düzeltmeleri + kendi hipotezini raporla.
 
@@ -377,6 +480,51 @@ FINAL ÇIKTI:
 - Tur sayısı
 - Değiştirilen dosyalar + diff özeti
 - Kök neden (1 paragraf)
+```
+
+### Örnek 5 (LOOP — Evaluator-Optimizer pattern): İçerik kalite döngüsü
+**İstek**: "Blog yazısını, ayrı bir editör ajan onaylayana kadar düzelten bir loop kur"
+
+**Çıktı**:
+```
+ROL: Sen (Writer) blog yazısını hedef kritere ulaşana kadar revize eden ajansın.
+
+PATTERN: Evaluator-Optimizer (Writer ≠ Evaluator, ayrı çağrı/prompt)
+
+HEDEF:
+Blog yazısı, ayrı bir Evaluator ajanın "APPROVED" JSON çıktısını verene kadar revize edilir.
+
+BAŞARI TANIMI (Verifier — Evaluator, Writer'dan bağımsız prompt):
+Evaluator, şu şemaya uyan JSON döndürür:
+{"verdict": "APPROVED" | "REJECTED", "reasons": [...]}
+Sadece "verdict": "APPROVED" çıkış koşulunu sağlar. Writer'ın kendi
+değerlendirmesi geçerli değildir.
+
+DÖNGÜ:
+1. EYLEM     → Writer taslağı yazar/revize eder.
+2. DOĞRULA   → Taslak Evaluator'a gönderilir; Evaluator YALNIZCA yukarıdaki
+                JSON şemasıyla yanıt verir.
+3. KARAR     → "APPROVED" ise DUR. "REJECTED" ise reasons'ı STATE'e ekle, 1'e dön.
+
+STATE (her turda güncelle):
+- Tur no:
+- Önceki reddedilme gerekçeleri (tekrar aynı hatayı yapma):
+- Taslağın son hâli:
+
+KISITLAR:
+- Maksimum 4 tur.
+- Evaluator'ın kriterlerini Writer değiştiremez.
+- Aynı gerekçeyle iki kez reddedilme → farklı bir yaklaşım dene.
+
+ESCALATION:
+4. tur dolduğunda hâlâ REJECTED ise: DUR, son taslağı + tüm red gerekçelerini
+insana sun, "İNSAN İNCELEMESİ GEREKLİ" yaz.
+
+FINAL ÇIKTI:
+- Sonuç: APPROVED / İNSAN İNCELEMESİ GEREKLİ
+- Tur sayısı
+- Son taslak
+- Red gerekçeleri geçmişi
 ```
 
 ---
@@ -402,13 +550,16 @@ FINAL ÇIKTI:
 - JSON istersan `{"key": "value"}` şeklinde örnek ver
 
 ### Problem: Loop sonsuza dönüyor / durmuyor
-**Çözüm**: Çıkış koşulu nesnel değil. Verifier'ı bir komuta bağla ve iterasyon limiti + escalation ekle.
+**Çözüm**: Çıkış koşulu doğrulanabilir değil (binary/deterministik/ölçülebilir değil). Verifier'ı bir komuta bağla ve iterasyon limiti + escalation (Circuit Breaker) ekle.
 
 ### Problem: Loop "başardım" diyor ama başarmamış
-**Çözüm**: Model kendi çıktısını doğruluyor. Doğrulamayı dışarıdaki bir sinyale (test/lint/build/HTTP) taşı ve "çıktıyı uydurma, komutu gerçekten çalıştır" kısıtını ekle.
+**Çözüm**: Model kendi çıktısını doğruluyor (self-serving evaluation bias). Worker/Checker'ı ayır: doğrulamayı dışarıdaki bir sinyale (test/lint/build/HTTP) veya bağımsız bir Evaluator çağrısına taşı, "çıktıyı uydurma, komutu gerçekten çalıştır" kısıtını ekle.
 
 ### Problem: Loop aynı hatayı tekrar tekrar deniyor
 **Çözüm**: State eksik. "Denenmiş ve işe yaramamış çözümler" listesini her turda taşıt ve tekrarı yasakla.
+
+### Problem: Yanlış pattern seçildi (ör. basit debug'a Multi-Agent Supervisor)
+**Çözüm**: Görev tek bir doğrulayıcıyla ölçülüyorsa Ralph Loop veya Evaluator-Optimizer yeterlidir; pattern'i göreve göre küçült.
 
 ---
 
@@ -420,8 +571,8 @@ Kullanıcı İsteği
 Mod Seçimi (Single-shot mu? Loop mu?)
     ↓                          ↓
 Gereksinim Toplama        Loop Tasarımı
-(Context, Constraints,    (Hedef, Verifier, Exit,
- Success Criteria)         Limit, State, Scope)
+(Context, Constraints,    (Pattern seçimi, Hedef, Verifier,
+ Success Criteria)         Exit, Limit, State, Scope)
     ↓                          ↓
 Prompt Tasarımı           Loop Prompt Şablonu
     ↓                          ↓
@@ -444,3 +595,16 @@ Output (Çalışmaya hazır prompt / loop metni)
 - Bu skill loop'u **tasarlar ve prompt'unu üretir**; loop'u çalıştıran runtime'ı kurmaz
 - n8n orchestration bu skill'de yer almıyor (loop prompt'u n8n'e beslenebilir)
 - Web search veya API integration prompt'lar hakkında bilgi verir ama implement etmez
+
+## Kaynaklar (References)
+
+Bu skill'in loop mühendisliği bölümü aşağıdaki kaynaklardan derlenen bilgiyle güncellenmiştir (2026):
+
+- [Loop Engineering: The Guide for AI Agents — Lushbinary](https://lushbinary.com/blog/loop-engineering-ai-coding-agents-guide/)
+- [Loop Engineering: Designing Autonomous AI Agent Loops — Claude Skills Hub](https://claudeskills.info/loop-engineering/)
+- [What Is Loop Engineering? — MindStudio](https://www.mindstudio.ai/blog/what-is-loop-engineering-ai-coding-agents)
+- [From Prompts to Loops: Building Autonomous Coding Agents — ITNEXT](https://itnext.io/from-prompts-to-loops-building-autonomous-coding-agents-6135bf880415)
+- [10 Loop Engineering Design Patterns for AI Builders — Data Science Dojo](https://datasciencedojo.com/blog/loop-engineering-design-patterns/)
+- [Agentic Loop Design: Goals and Verification Criteria — MindStudio](https://www.mindstudio.ai/blog/agentic-loop-design-goals-verification-criteria)
+- [How to Design Agent Loops with Verifiable Stop Conditions — MindStudio](https://www.mindstudio.ai/blog/agent-loops-verifiable-stop-conditions)
+- [Loop Engineering — Cobus Greyling (Medium)](https://cobusgreyling.medium.com/loop-engineering-62926dd6991c)
